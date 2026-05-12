@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voice Farmer Form</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body class="bg-[#ece5dd] min-h-screen flex justify-center items-start p-4">
+
+  <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+    <!-- Header -->
+    <div class="bg-[#075e54] text-white p-4 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">
+        🌾
+      </div>
+      <div>
+        <h1 class="font-bold text-lg">Farmer Voice Form</h1>
+        <p class="text-xs text-white/80">Tamil Audio Survey</p>
+      </div>
+    </div>
+
+    <!-- Question Container -->
+    <div id="questionContainer" class="p-4 space-y-4"></div>
+
+    <!-- Navigation -->
+    <div class="p-4 border-t flex justify-between gap-3">
+      <button id="prevBtn"
+        class="bg-gray-200 px-4 py-2 rounded-xl font-medium w-full">
+        Previous
+      </button>
+
+      <button id="nextBtn"
+        class="bg-[#25d366] text-white px-4 py-2 rounded-xl font-medium w-full">
+        Next
+      </button>
+    </div>
+  </div>
+
+<script>
+
+const questions = [
+
+  {
+    id: 'farmer_name',
+    question: 'உங்கள் பெயர் என்ன?'
+  },
+
+  {
+    id: 'state',
+    question: 'நீங்கள் எந்த மாநிலத்தில் இருக்கிறீர்கள்?'
+  },
+
+  {
+    id: 'district',
+    question: 'உங்கள் மாவட்டம் என்ன?'
+  },
+
+  {
+    id: 'farm_size',
+    question: 'உங்கள் பண்ணை அளவு எத்தனை ஏக்கர்?'
+  },
+
+  {
+    id: 'productivity_level',
+    question: 'ஒவ்வொரு விளைச்சல் சுற்றிலும் எதிர்பார்க்கப்படும் உற்பத்தி அளவு என்ன?'
+  },
+
+  {
+    id: 'labour_management',
+    question: 'நீங்கள் தொழிலாளர்களை எப்படி நிர்வகிக்கிறீர்கள்?'
+  },
+
+  {
+    id: 'farming_type',
+    question: 'நீங்கள் எந்த வகை விவசாயம் செய்கிறீர்கள்?'
+  },
+
+  {
+    id: 'labour_availability',
+    question: 'தொழிலாளர்கள் எளிதாக கிடைக்கிறார்களா?'
+  },
+
+  {
+    id: 'labour_salary',
+    question: 'தொழிலாளர்களின் சராசரி சம்பளம் எவ்வளவு?'
+  },
+
+  {
+    id: 'smartphone_usage',
+    question: 'தொழிலாளர்களுக்கு ஸ்மார்ட்போன் பயன்படுத்த தெரியுமா?'
+  },
+
+  {
+    id: 'electricity',
+    question: 'மின்சாரம் கிடைக்கிறதா?'
+  },
+
+  {
+    id: 'internet',
+    question: 'இணைய வசதி உள்ளதா?'
+  },
+
+  {
+    id: 'livestock',
+    question: 'உங்களிடம் கால்நடைகள் உள்ளனவா?'
+  },
+
+  {
+    id: 'pre_plant_workers',
+    question: 'விதைப்பு முன் நிலைக்கு எத்தனை தொழிலாளர்கள் தேவை?'
+  },
+
+  {
+    id: 'pre_plant_days',
+    question: 'விதைப்பு முன் நிலைக்கு எத்தனை நாட்கள் தேவை?'
+  },
+
+  {
+    id: 'plant_workers',
+    question: 'நடவு மற்றும் வளர்ச்சி நிலைக்கு எத்தனை தொழிலாளர்கள் தேவை?'
+  },
+
+  {
+    id: 'plant_days',
+    question: 'நடவு மற்றும் வளர்ச்சி நிலைக்கு எத்தனை நாட்கள் தேவை?'
+  },
+
+  {
+    id: 'flower_workers',
+    question: 'மலர்ச்சி மற்றும் கனிவளர்ச்சி நிலைக்கு எத்தனை தொழிலாளர்கள் தேவை?'
+  },
+
+  {
+    id: 'flower_days',
+    question: 'மலர்ச்சி மற்றும் கனிவளர்ச்சி நிலைக்கு எத்தனை நாட்கள் தேவை?'
+  },
+
+  {
+    id: 'harvest_workers',
+    question: 'அறுவடை நிலைக்கு எத்தனை தொழிலாளர்கள் தேவை?'
+  },
+
+  {
+    id: 'harvest_days',
+    question: 'அறுவடை நிலைக்கு எத்தனை நாட்கள் தேவை?'
+  },
+
+  {
+    id: 'labour_cost_increase',
+    question: 'தொழிலாளர் செலவு ஆண்டுதோறும் அதிகரிக்கிறதா?'
+  },
+
+  {
+    id: 'labour_shortage',
+    question: 'அறுவடை நேரத்தில் தொழிலாளர் பற்றாக்குறை இருக்கிறதா?'
+  },
+
+  {
+    id: 'off_season_idle',
+    question: 'விவசாயம் இல்லாத காலங்களில் தொழிலாளர்கள் வேலை இல்லாமல் இருக்கிறார்களா?'
+  },
+
+  {
+    id: 'machines_reduce_cost',
+    question: 'இயந்திரங்கள் செலவை குறைத்து உற்பத்தியை அதிகரிக்குமா?'
+  },
+
+  {
+    id: 'machine_expensive',
+    question: 'இயந்திர முதலீடு அதிக செலவா?'
+  },
+
+  {
+    id: 'preferred_method',
+    question: 'நீங்கள் எந்த வகை விவசாய முறையை விரும்புகிறீர்கள்?'
+  },
+
+  {
+    id: 'labour_issue_solution',
+    question: 'தொழிலாளர் செலவு அதிகரித்தால் அல்லது தொழிலாளர்கள் கிடைக்காவிட்டால் என்ன செய்வீர்கள்?'
+  },
+
+  {
+    id: 'machine_spending',
+    question: 'இயந்திரங்களுக்கு நீங்கள் எவ்வளவு செலவு செய்கிறீர்கள்?'
+  },
+
+  {
+    id: 'future_machines',
+    question: 'எதிர்காலத்தில் மேலும் இயந்திரங்களை பயன்படுத்த விருப்பமா?'
+  },
+
+  {
+    id: 'regular_work',
+    question: 'தொழிலாளர்களுக்கு வருடம் முழுவதும் வேலை கிடைக்கிறதா?'
+  },
+
+  {
+    id: 'biggest_problem',
+    question: 'விவசாயத்தில் மிகப்பெரிய பிரச்சனை என்ன?'
+  },
+
+  {
+    id: 'market_price',
+    question: 'உங்கள் விளைபொருளை சந்தையில் எவ்வளவு விலையில் விற்கிறீர்கள்?'
+  },
+
+  {
+    id: 'suggestions',
+    question: 'உங்கள் பரிந்துரைகள் என்ன?'
+  }
+
+];
+
+let currentQuestion = 0;
+let mediaRecorder;
+let audioChunks = [];
+let recordings = {};
+let transcripts = {};
+
+const container = document.getElementById('questionContainer');
+const nextBtn = document.getElementById('nextBtn');
+const prevBtn = document.getElementById('prevBtn');
+
+function renderQuestion() {
+
+  const q = questions[currentQuestion];
+
+  container.innerHTML = `
+
+    <div class="text-center text-sm text-gray-500">
+      Question ${currentQuestion + 1} / ${questions.length}
+    </div>
+
+    <!-- Question Bubble -->
+    <div class="flex justify-start">
+      <div class="bg-white shadow rounded-2xl p-4 w-full border">
+
+        <p class="text-sm mb-3 text-gray-700 leading-relaxed">
+          ${q.question}
+        </p>
+
+        <div class="bg-gray-100 p-3 rounded-xl text-sm text-gray-700">
+  🔊 Audio will be added later
+       </div>
+      </div>
+
+
+    </div>
+
+    <!-- Answer Bubble -->
+    <div class="flex justify-end">
+      <div class="bg-[#dcf8c6] rounded-2xl p-4 w-[85%] shadow">
+
+        <p class="text-sm mb-3 font-medium text-gray-700">
+          Your Voice Answer
+        </p>
+
+        <div class="flex gap-2 flex-wrap">
+
+          <button id="recordBtn"
+            class="bg-red-500 text-white px-4 py-2 rounded-xl text-sm">
+            🎤 Hold To Record
+          </button>
+
+          <button id="deleteBtn"
+            class="bg-gray-300 px-4 py-2 rounded-xl text-sm">
+            🗑 Delete
+          </button>
+
+        </div>
+
+        <div id="preview" class="mt-4"></div>
+
+        <div
+          id="liveTranscript"
+          class="mt-3 text-sm text-gray-700 bg-white p-3 rounded-xl border"
+        >
+          🎙 Waiting for transcript...
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  setupRecording(q.id);
+  updateButtons();
+}
+
+function setupRecording(questionId) {
+
+  const recordBtn = document.getElementById('recordBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const preview = document.getElementById('preview');
+
+  if (recordings[questionId]) {
+    preview.innerHTML = `
+      <audio controls class="w-full">
+        <source src="${recordings[questionId].url}">
+      </audio>
+    `;
+  }
+
+  recordBtn.addEventListener('mousedown', startRecording);
+  recordBtn.addEventListener('mouseup', stopRecording);
+
+  recordBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startRecording();
+  });
+
+  recordBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    stopRecording();
+  });
+
+  deleteBtn.addEventListener('click', () => {
+    delete recordings[questionId];
+    delete transcripts[questionId];
+    preview.innerHTML = '';
+    const transcriptElement =
+    document.getElementById('liveTranscript');
+
+    if (transcriptElement) {
+
+      transcriptElement.innerText =
+        '🎙 Waiting for transcript...';
+
+    }
+  });
+
+  async function startRecording() {
+
+    audioChunks = [];
+    transcripts[questionId] = '';
+
+    const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+let recognition;
+
+if (SpeechRecognition) {
+
+  recognition = new SpeechRecognition();
+
+  recognition.lang = 'ta-IN';
+
+  recognition.continuous = true;
+
+  recognition.interimResults = false;
+
+  recognition.onresult = (event) => {
+
+    let finalTranscript = '';
+
+    for (
+      let i = event.resultIndex;
+      i < event.results.length;
+      i++
+    ) {
+
+      finalTranscript +=
+        event.results[i][0].transcript;
+
+    }
+
+    transcripts[questionId] = finalTranscript;
+
+    const transcriptElement =
+      document.getElementById('liveTranscript');
+
+    if (transcriptElement) {
+
+      transcriptElement.innerText =
+        finalTranscript;
+
+    }
+
+    console.log(
+      'Tamil Transcript:',
+      finalTranscript
+    );    
+
+  };
+
+  recognition.start();
+}
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true
+    });
+
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.start();
+
+    recordBtn.innerText = '🔴 Recording...';
+
+    mediaRecorder.addEventListener('dataavailable', event => {
+      audioChunks.push(event.data);
+    });
+
+    mediaRecorder.addEventListener('stop', () => {
+
+      const audioBlob = new Blob(audioChunks, {
+        type: 'audio/webm'
+      });
+
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      recordings[questionId] = {
+        blob: audioBlob,
+        url: audioUrl,
+        status: 'Pending Transcription',
+        transcript: ''
+      };
+
+      preview.innerHTML = `
+        <audio controls class="w-full">
+          <source src="${audioUrl}">
+        </audio>
+
+        <p class="text-xs text-gray-600 mt-2">
+         ✅ Recorded Successfully
+        </p>
+
+        <p class="text-sm text-gray-800 mt-2">
+         ${transcripts[questionId] || 'No transcript detected'}
+        </p>
+      `;
+
+      recordBtn.innerText = '🎤 Hold To Record';
+    });
+  }
+
+  function stopRecording() {
+
+  if (
+    mediaRecorder &&
+    mediaRecorder.state !== 'inactive'
+  ) {
+
+    mediaRecorder.stop();
+
+  }
+
+}
+}
+
+function updateButtons() {
+  prevBtn.disabled = currentQuestion === 0;
+
+  if (currentQuestion === questions.length - 1) {
+    nextBtn.innerText = 'Submit';
+  } else {
+    nextBtn.innerText = 'Next';
+  }
+}
+
+prevBtn.addEventListener('click', () => {
+  if (currentQuestion > 0) {
+    currentQuestion--;
+    renderQuestion();
+  }
+});
+
+nextBtn.addEventListener('click', async () => {
+
+  if (currentQuestion < questions.length - 1) {
+    currentQuestion++;
+    renderQuestion();
+    } else {
+
+    const formData = new FormData();
+    formData.append(
+  'transcripts',
+  JSON.stringify(transcripts)
+);
+
+    for (const key in recordings) {
+
+      const recording = recordings[key];
+
+      if (recording?.blob) {
+
+        formData.append(
+          'audioFiles',
+          recording.blob,
+          `${key}.webm`
+        );
+
+      }
+    }
+
+    try {
+
+      const response = await fetch(
+        'http://localhost:5000/upload',
+        {
+          method: 'POST',
+          body: formData
+        }
+      );
+
+      const result = await response.json();
+
+      console.log(result);
+
+      alert('Voice form submitted successfully');
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert('Upload failed');
+
+    }
+
+  }
+});
+
+function exportExcel(data) {
+
+  const worksheet = XLSX.utils.json_to_sheet([data]);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    'FarmerData'
+  );
+
+  XLSX.writeFile(workbook, 'farmer_form.xlsx');
+}
+
+renderQuestion();
+
+</script>
+
+</body>
+</html>
