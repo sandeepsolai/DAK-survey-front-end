@@ -404,32 +404,31 @@ function setupRecording(questionId) {
 
 
 
-    if (!('ontouchstart' in window)) {
+  // Desktop mouse events
+  recordBtn.addEventListener('mousedown', (e) => {
+    startRecording().catch(console.error);
+  });
 
-      recordBtn.addEventListener(
-        'mousedown',
-        () => startRecording().catch(console.error)
-      );
+  recordBtn.addEventListener('mouseup', () => {
+    stopRecording();
+  });
 
-      recordBtn.addEventListener(
-        'mouseup',
-        stopRecording
-      );
+  // Mobile touch events with preventDefault to block context menu
+  recordBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startRecording().catch(console.error);
+  }, { passive: false });
 
-    }
+  recordBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    stopRecording();
+  }, { passive: false });
 
-
-recordBtn.addEventListener('touchstart', () => {
-
-  startRecording().catch(console.error);
-
-}, { passive: true });
-
-recordBtn.addEventListener('touchend', () => {
-
-  stopRecording();
-
-}, { passive: true });
+  // Handle interruption (e.g., system interrupt, swipe away)
+  recordBtn.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    stopRecording();
+  }, { passive: false });
 
 
 
