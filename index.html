@@ -266,6 +266,7 @@ let recordings = {};
 let transcripts = {};
 let recognition = null;
 
+
 const container = document.getElementById('questionContainer');
 const nextBtn = document.getElementById('nextBtn');
 const prevBtn = document.getElementById('prevBtn');
@@ -448,19 +449,61 @@ recordBtn.addEventListener('touchend', () => {
     }
   });
 
-  async function startRecording() {
 
-    audioChunks = [];
-    transcripts[questionId] = '';
+
+
+async function startRecording() {
+
+  audioChunks = [];
+  transcripts[questionId] = '';
+
+
+
+
+
+
+
 
   
 
-  const SpeechRecognition =
+
+
+
+
+
+
+
+
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true
+    });
+
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.start();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const SpeechRecognition =
   window.SpeechRecognition ||
   window.webkitSpeechRecognition;
 
   const transcriptElement =
-document.getElementById('liveTranscript');
+   document.getElementById('liveTranscript');
 
 if (!SpeechRecognition && transcriptElement) {
 
@@ -519,13 +562,23 @@ if (SpeechRecognition) {
   recordBtn.dataset.recognition = 'active';
 }
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true
-    });
 
-    mediaRecorder = new MediaRecorder(stream);
 
-    mediaRecorder.start();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     recordBtn.innerHTML = `
   <div class="flex items-center gap-2">
