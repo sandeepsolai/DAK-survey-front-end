@@ -418,15 +418,20 @@ function setupRecording(questionId) {
     }
 
 
-  recordBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startRecording().catch(console.error);
-  });
+recordBtn.addEventListener('touchstart', () => {
 
-  recordBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopRecording();
-  });
+  startRecording().catch(console.error);
+
+}, { passive: true });
+
+recordBtn.addEventListener('touchend', () => {
+
+  stopRecording();
+
+}, { passive: true });
+
+
+
 
   deleteBtn.addEventListener('click', () => {
     delete recordings[questionId];
