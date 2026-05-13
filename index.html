@@ -335,8 +335,8 @@ function renderQuestion() {
     </div>
 
     <!-- Answer Bubble -->
-    <div class="flex justify-end">
-      <div class="bg-[#dcf8c6] rounded-2xl p-4 w-[85%] shadow">
+    <div class="flex justify-end mt-3">
+      <div class="bg-[#dcf8c6] rounded-2xl p-4 w-full shadow">
 
         <p class="text-sm mb-3 font-medium text-gray-700">
           Optional Voice Note
@@ -375,6 +375,14 @@ function renderQuestion() {
   `;
 
   setupRecording(q.id);
+  if (answers[q.id]) {
+
+  selectAnswer(
+    q.id,
+    answers[q.id]
+  );
+
+}
   updateButtons();
 }
 
@@ -392,10 +400,27 @@ function setupRecording(questionId) {
     `;
   }
 
-  recordBtn.addEventListener(
-  'mousedown',
-  () => startRecording().catch(console.error)
-);
+
+
+
+    if (!('ontouchstart' in window)) {
+
+      recordBtn.addEventListener(
+        'mousedown',
+        () => startRecording().catch(console.error)
+      );
+
+      recordBtn.addEventListener(
+        'mouseup',
+        stopRecording
+      );
+
+    }
+
+
+
+
+
   recordBtn.addEventListener('mouseup', stopRecording);
 
   recordBtn.addEventListener('touchstart', (e) => {
@@ -433,6 +458,16 @@ function setupRecording(questionId) {
   const SpeechRecognition =
   window.SpeechRecognition ||
   window.webkitSpeechRecognition;
+
+  const transcriptElement =
+document.getElementById('liveTranscript');
+
+if (!SpeechRecognition && transcriptElement) {
+
+  transcriptElement.innerText =
+    'Transcript not supported on this device';
+
+}
 
 
 
