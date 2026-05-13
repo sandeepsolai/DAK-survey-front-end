@@ -265,7 +265,7 @@ let answers = {};
 let recordings = {};
 let transcripts = {};
 let recognition = null;
-
+let isRecording = false;
 
 const container = document.getElementById('questionContainer');
 const nextBtn = document.getElementById('nextBtn');
@@ -351,7 +351,7 @@ function renderQuestion() {
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v11m0 0a3 3 0 003-3V5a3 3 0 10-6 0v4a3 3 0 003 3zm0 0v4m-4 0h8" />
               </svg>
-              <span>Hold to Record</span>
+              <span>Tap to Record</span>
             </div>
           </button>
 
@@ -404,31 +404,21 @@ function setupRecording(questionId) {
 
 
 
-  // Desktop mouse events
-  recordBtn.addEventListener('mousedown', (e) => {
-    startRecording().catch(console.error);
-  });
 
-  recordBtn.addEventListener('mouseup', () => {
+recordBtn.addEventListener('click', async () => {
+
+  if (!isRecording) {
+
+    await startRecording();
+
+  } else {
+
     stopRecording();
-  });
 
-  // Mobile touch events with preventDefault to block context menu
-  recordBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startRecording().catch(console.error);
-  }, { passive: false });
+  }
 
-  recordBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopRecording();
-  }, { passive: false });
+});
 
-  // Handle interruption (e.g., system interrupt, swipe away)
-  recordBtn.addEventListener('touchcancel', (e) => {
-    e.preventDefault();
-    stopRecording();
-  }, { passive: false });
 
 
 
@@ -454,6 +444,7 @@ function setupRecording(questionId) {
 async function startRecording() {
 
   audioChunks = [];
+  isRecording = true;
   transcripts[questionId] = '';
 
 
@@ -637,7 +628,7 @@ if (SpeechRecognition) {
       />
     </svg>
 
-    <span>Hold to Record</span>
+    <span>Tap to Record</span>
 
   </div>
 `;
@@ -645,6 +636,8 @@ if (SpeechRecognition) {
   }
 
 function stopRecording() {
+
+  isRecording = false;
 
   if (
     mediaRecorder &&
