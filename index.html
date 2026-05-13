@@ -258,6 +258,7 @@ const questions = [
 
 
 let currentQuestion = 0;
+let isSubmitting = false;
 let mediaRecorder;
 let audioChunks = [];
 let answers = {};
@@ -325,7 +326,7 @@ function renderQuestion() {
 
 
 
-        <div class="bg-gray-100 p-3 rounded-xl text-sm text-gray-700">
+        <div class="mt-4 bg-gray-100 p-3 rounded-xl text-sm text-gray-700">
   🔊 Audio will be added later
        </div>
       </div>
@@ -344,8 +345,13 @@ function renderQuestion() {
         <div class="flex gap-2 flex-wrap">
 
           <button id="recordBtn"
-            class="bg-red-500 text-white px-4 py-2 rounded-xl text-sm">
-            🎤 Hold To Record
+            class="bg-red-500 text-white px-4 py-2 rounded-xl text-sm select-none touch-none">
+            <div class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v11m0 0a3 3 0 003-3V5a3 3 0 10-6 0v4a3 3 0 003 3zm0 0v4m-4 0h8" />
+              </svg>
+              <span>Hold to Record</span>
+            </div>
           </button>
 
           <button id="deleteBtn"
@@ -486,7 +492,12 @@ if (SpeechRecognition) {
 
     mediaRecorder.start();
 
-    recordBtn.innerText = '🔴 Recording...';
+    recordBtn.innerHTML = `
+  <div class="flex items-center gap-2">
+    <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+    <span>Recording...</span>
+  </div>
+`;
 
     mediaRecorder.addEventListener('dataavailable', event => {
       audioChunks.push(event.data);
@@ -521,7 +532,28 @@ if (SpeechRecognition) {
         </p>
       `;
 
-      recordBtn.innerText = '🎤 Hold To Record';
+      recordBtn.innerHTML = `
+  <div class="flex items-center gap-2">
+
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 1v11m0 0a3 3 0 003-3V5a3 3 0 10-6 0v4a3 3 0 003 3zm0 0v4m-4 0h8"
+      />
+    </svg>
+
+    <span>Hold to Record</span>
+
+  </div>
+`;
     });
   }
 
@@ -611,10 +643,23 @@ prevBtn.addEventListener('click', () => {
 
 nextBtn.addEventListener('click', async () => {
 
+  if (isSubmitting) return;
+
   if (currentQuestion < questions.length - 1) {
     currentQuestion++;
     renderQuestion();
     } else {
+
+    isSubmitting = true;
+
+    nextBtn.disabled = true;
+
+    nextBtn.innerHTML = `
+      <div class="flex items-center justify-center gap-2">
+        <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        Submitting...
+      </div>
+    `;
 
     const formData = new FormData();
     formData.append(
@@ -655,12 +700,23 @@ nextBtn.addEventListener('click', async () => {
 
       console.log(result);
 
-      alert('Voice form submitted successfully');
+      document.body.innerHTML = `
+        <div class="min-h-screen bg-[#ece5dd] flex items-center justify-center p-6">
+          <div class="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-md w-full">
+            <div class="text-6xl mb-4">✅</div>
+            <h1 class="text-2xl font-bold text-[#075e54] mb-3">Survey Submitted</h1>
+            <p class="text-gray-600">Thank you for participating in the survey.</p>
+          </div>
+        </div>
+      `;
 
     } catch (error) {
 
       console.error(error);
 
+      isSubmitting = false;
+      nextBtn.disabled = false;
+      nextBtn.innerText = 'Submit';
       alert('Upload failed');
 
     }
